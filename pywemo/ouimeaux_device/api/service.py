@@ -5,11 +5,10 @@ from xml.etree import cElementTree as et
 
 import requests
 
+from pywemo.constants import MAX_RETRIES, DEVICE_ACTION_TIMEOUT
 from .xsd import service as serviceParser
 
-
 LOG = logging.getLogger(__name__)
-MAX_RETRIES = 3
 
 REQUEST_TEMPLATE = """
 <?xml version="1.0" encoding="utf-8"?>
@@ -60,11 +59,11 @@ class Action:
             service=self.serviceType,
             args=arglist
         )
-        for attempt in range(3):
+        for attempt in range(MAX_RETRIES):
             try:
                 response = requests.post(
                     self.controlURL, body.strip(),
-                    headers=self.headers, timeout=10)
+                    headers=self.headers, timeout=DEVICE_ACTION_TIMEOUT)
                 response_dict = {}
                 # pylint: disable=deprecated-method
                 for response_item in et.fromstring(
